@@ -33,7 +33,7 @@ class redis_server:
         self.PORT = PORT
         self.server = None
 
-    def start(self):
+    def start(self, daemon=False):
         self.server = ThreadedTCPServer((self.HOST, self.PORT), ThreadedTCPRequestHandler)
         ip, port = self.server.server_address
 
@@ -41,7 +41,7 @@ class redis_server:
         # more thread for each request
         server_thread = threading.Thread(target=self.server.serve_forever)
         # Exit the server thread when the main thread terminates
-        # server_thread.daemon = True
+        server_thread.daemon = daemon
         server_thread.start()
         print "Server loop running in thread:", server_thread.name
 
