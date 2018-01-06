@@ -13,6 +13,17 @@ def register_oper(**kwds):
     return decorate
 
 
+def no_oper(paras):
+    print paras
+    return ["opertion error."]
+
+
+def handle_req(paras):
+    oper_name = paras[0]
+    oper = oper_map.get(oper_name, no_oper)
+    return oper(paras)
+
+
 @register_oper(key="SET")
 def do_set(paras):
     if len(paras) != 3:
@@ -34,11 +45,3 @@ def do_get(paras):
     return [store.get(key=key)]
 
 
-
-def no_oper(values):
-    return ["opertion error."]
-
-def handle_req(paras):
-    oper_name = paras[0]
-    oper = oper_map.get(oper_name, no_oper)
-    return oper(paras)
