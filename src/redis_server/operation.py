@@ -1,16 +1,39 @@
 import store
 
+oper_map = { }
+
+
+def register_oper(**kwds):
+    def decorate(f):
+        key = kwds.get("key")
+        if key:
+            oper_map[key] = f
+        return f
+
+    return decorate
+
+
+@register_oper(key="SET")
 def do_set(paras):
-    return paras
+    if len(paras) != 3:
+        return ["parameters error"]
 
+    action, key, value = paras
+
+    store.set(key=key, value=value)
+    return ["0"]
+
+
+@register_oper(key="GET")
 def do_get(paras):
-    return paras
+    if len(paras) != 2:
+        return ["parameters error"]
+
+    action, key = paras
+
+    return [store.get(key=key)]
 
 
-oper_map = {
-    "SET": do_set,
-    "GET": do_get,
-}
 
 def no_oper(values):
     return ["opertion error."]
