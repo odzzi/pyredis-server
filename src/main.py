@@ -18,8 +18,10 @@ if __name__ == "__main__":
 
     s = server.redis_server(HOST=HOST, PORT=PORT)
     s.start()
-    req = "\r\n".join(["*3", "$3","SET","$5","my\x00ey","$7", "myvalue"])
-    print req
+    req = "\r\n".join(["*3", "$3","SET","$5","mykey","$7", "myvalue"])
     client(HOST, PORT, "%s\r\n" % req)
+    req = "\r\n".join(["*2", "$3", "GET", "$5", "mykey"])
+    client(HOST, PORT, "%s\r\n" % req)
+
     s.stop()
 
