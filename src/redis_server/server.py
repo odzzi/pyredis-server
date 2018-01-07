@@ -2,30 +2,43 @@ import threading
 import SocketServer
 import operation
 
+
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
     def handle(self):
         s = self.request
         f = s.makefile()
         count = f.readline()
+        #print count
         if count.startswith("*"):
             count = int(count[1:].strip())
-            print count
+            #print count
             paras = []
             for x in range(count):
                 length = f.readline()
+                #print length
                 if length.startswith("$"):
                     length = int(length[1:].strip())
                     value = f.read(length)
                     f.read(2)  # skip CR LF
-                    print length, value
+                    #print length, value
                     paras.append(value)
                 else:
                     print length
-            f.write("\r\n".join(operation.handle_req(paras)))
+            ret = operation.handle_req(paras)
+            if len(ret) > 1:
+                resp = "*%s\r\n%s"%(len(ret), "".join(ret))
+            else:
+                resp = "".join(ret)
+            #print repr(resp)
+            f.write(resp)
+        else:
+            print count
+
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
+
 
 class redis_server:
     def __init__(self, HOST, PORT=6379):
