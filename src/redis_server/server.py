@@ -9,7 +9,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         s = self.request
         f = s.makefile()
         count = f.readline()
-        #print count
+        resp = operation.encode_para(["-ERR unknown error"])
         if count.startswith("*"):
             count = int(count[1:].strip())
             #print count
@@ -24,16 +24,18 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
                     #print length, value
                     paras.append(value)
                 else:
-                    print length
+                    resp = operation.encode_para(["-ERR parameters error"])
             ret = operation.handle_req(paras)
             if len(ret) > 1:
                 resp = "*%s\r\n%s"%(len(ret), "".join(ret))
             else:
                 resp = "".join(ret)
             #print repr(resp)
-            f.write(resp)
+
         else:
-            print count
+            resp = operation.encode_para(["-ERR parameters error"])
+
+        f.write(resp)
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
