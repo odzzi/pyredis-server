@@ -14,7 +14,7 @@ def register_oper(**kwds):
 
 
 def encode_para(paras):
-    return map(lambda x: "$%s\r\n%s\r\n" % (len(x), x) if x else "$-1", paras)
+    return map(lambda x: "$%s\r\n%s\r\n" % (len(x), x) if x else "$-1\r\n", paras)
 
 def no_oper(paras):
     print paras
@@ -30,18 +30,18 @@ def handle_req(paras):
 @register_oper(key="SET")
 def do_set(paras):
     if len(paras) != 3:
-        return ["-ERR parameters error"]
+        return encode_para(["-ERR parameters error"])
 
     action, key, value = paras
 
     store.set(key=key, value=value)
-    return ["+OK"]
+    return encode_para(["OK"])
 
 
 @register_oper(key="GET")
 def do_get(paras):
     if len(paras) != 2:
-        return ["-ERR parameters error"]
+        return encode_para(["-ERR parameters error"])
 
     action, key = paras
 
@@ -51,6 +51,6 @@ def do_get(paras):
 @register_oper(key="DEL")
 def do_del(paras):
     if len(paras) < 2:
-        return ["-ERR parameters error"]
+        return encode_para(["-ERR parameters error"])
 
-    return [":%s" % store.DEL(paras[1:])]
+    return [":%s\r\n" % store.DEL(paras[1:])]
