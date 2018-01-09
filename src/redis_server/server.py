@@ -58,7 +58,7 @@ class redis_server:
         # Exit the server thread when the main thread terminates
         server_thread.daemon = daemon
         server_thread.start()
-        print "Server loop running in thread:", server_thread.name
+        print "pyredis-server listening on %s:%s"% (self.HOST, self.PORT)
 
     def stop(self):
         if self.server:
