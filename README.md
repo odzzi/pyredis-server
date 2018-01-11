@@ -9,7 +9,7 @@ It's easy to run a redis server for every one.
 + cd the src/;
 + run
 ```bat
-python main.py
+python main.py [[IP] PORT]
 ```
 The default IP is 127.0.0.1, PORT is 6379.
 

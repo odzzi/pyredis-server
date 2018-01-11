@@ -54,3 +54,35 @@ def do_del(paras):
         return encode_para(["-ERR parameters error"])
 
     return [":%s\r\n" % store.DEL(paras[1:])]
+
+import array
+def checksum(data):
+    if len(data) % 2:
+        data += b'\x00'
+    s = sum(array.array('H',data))
+    s = (s & 0xffff) + (s >> 16)
+    s += (s >> 16)
+    return (~s & 0xffff)
+
+
+@register_oper(key="DUMP")
+def do_dump(paras):
+    if len(paras) != 2:
+        return encode_para(["-ERR parameters error"])
+
+    action, key = paras
+    value = store.get(key)
+    if value:
+        ret = hex(checksum(value))
+    else:
+        ret = "$-1"
+    return encode_para([ret])
+
+
+@register_oper(key="SELECT")
+def do_select(paras):
+    if len(paras) != 2:
+        return encode_para(["-ERR parameters error"])
+    print "SELECT",paras
+    return ["$2\r\nOK\r\n"]
+
