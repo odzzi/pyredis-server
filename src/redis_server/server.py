@@ -1,6 +1,9 @@
 import threading
 import SocketServer
 import operation
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
@@ -15,16 +18,16 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
                 resp = operation.encode_para(["-ERR unknown error"])
                 if count.startswith("*"):
                     count = int(count[1:].strip())
-                    #print count
+                    logging.debug(count)
 
                     for x in range(count):
-                        length = f.readline()
-                        #print length
+                        length = f.readline().strip()
+                        logging.debug(length)
                         if length.startswith("$"):
-                            length = int(length[1:].strip())
+                            length = int(length[1:])
                             value = f.read(length)
                             f.read(2)  # skip CR LF
-                            #print length, value
+                            logging.debug("%s, %s", length, value)
                             paras.append(value)
                         else:
                             resp = operation.encode_para(["-ERR parameters error"])
@@ -33,15 +36,14 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
                         resp = "*%s\r\n%s"%(len(ret), "".join(ret))
                     else:
                         resp = "".join(ret)
-                    #print repr(resp)
 
                 else:
                     resp = operation.encode_para(["-ERR parameters error"])
 
                 f.write(resp)
-                # print "%s end\n" % (str(paras)),
+                logging.debug("%s => %s" % (str(paras), repr(resp)))
         except Exception, e:
-            print e
+            logging.warn("%s: %s", s.getpeername(), str(e))
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):

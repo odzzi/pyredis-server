@@ -1,4 +1,6 @@
 import store
+import logging
+
 
 oper_map = { }
 
@@ -17,8 +19,8 @@ def encode_para(paras):
     return map(lambda x: "$%s\r\n%s\r\n" % (len(x), x) if x else "$-1\r\n", paras)
 
 def no_oper(paras):
-    print paras
-    return ["-ERR opertion error."]
+    logging.debug("operation not implemented: %s", str(paras))
+    return encode_para(["-ERR opertion error."])
 
 
 def handle_req(paras):
@@ -83,6 +85,6 @@ def do_dump(paras):
 def do_select(paras):
     if len(paras) != 2:
         return encode_para(["-ERR parameters error"])
-    print "SELECT",paras
+    logging.debug("SELECT %s", str(paras))
     return ["$2\r\nOK\r\n"]
 
