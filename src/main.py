@@ -3,10 +3,10 @@ import sys
 from redis_server import server
 
 
-def showUsage():
+def show_usage():
     print "usage:"
-    print "","python main.py PORT"
-    print "","python main.py IP PORT"
+    print "", "python main.py PORT"
+    print "", "python main.py IP PORT"
 
 if __name__ == "__main__":
     # Port 0 means to select an arbitrary unused port
@@ -14,17 +14,19 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         try:
             PORT = int(sys.argv[1])
-        except:
-            showUsage()
+        except ValueError, e:
+            print e
+            show_usage()
             exit(1)
 
     if len(sys.argv) == 3:
         try:
             HOST = sys.argv[1]
             PORT = int(sys.argv[2])
-        except:
-            showUsage()
+        except ValueError, e:
+            print e
+            show_usage()
             exit(1)
 
-    s = server.redis_server(HOST=HOST, PORT=PORT)
+    s = server.RedisServer(host=HOST, port=PORT)
     s.start()
