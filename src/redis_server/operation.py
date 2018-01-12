@@ -43,32 +43,50 @@ def handle_req(paras):
     return oper(paras)
 
 
+def check_paras_len(*ffargs, **ffkeywords):
+    def partial(func, *args, **keywords):
+        def newfunc(*fargs, **fkeywords):
+            print (ffargs, ffkeywords)
+            eq = ffkeywords.get("eq")
+            lt = ffkeywords.get("lt")
+            gt = ffkeywords.get("gt")
+            paras = fargs[0]
+            if eq is not None and len(paras) != eq:
+                return encode_para(["-ERR parameters error"])
+            if lt is not None and len(paras) >= lt:
+                return encode_para(["-ERR parameters error"])
+            if gt is not None and len(paras) <= gt:
+                return encode_para(["-ERR parameters error"])
+            print (func, args, keywords)
+            print (fargs, fkeywords)
+            newkeywords = keywords.copy()
+            newkeywords.update(fkeywords)
+            return func(*(args + fargs), **newkeywords)
+
+        newfunc.func = func
+        newfunc.args = args
+        newfunc.keywords = keywords
+        return newfunc
+    return partial
+
 @register_oper(key="SET")
+@check_paras_len(eq=3)
 def do_set(paras):
-    if len(paras) != 3:
-        return encode_para(["-ERR parameters error"])
-
     action, key, value = paras
-
     database.set(key=key, value=value)
     return encode_para(["OK"])
 
 
 @register_oper(key="GET")
+@check_paras_len(eq=2)
 def do_get(paras):
-    if len(paras) != 2:
-        return encode_para(["-ERR parameters error"])
-
     action, key = paras
-
     return encode_para([database.get(key=key)])
 
 
 @register_oper(key="DEL")
+@check_paras_len(eq=2)
 def do_del(paras):
-    if len(paras) < 2:
-        return encode_para(["-ERR parameters error"])
-
     return [":%s\r\n" % database.DEL(paras[1:])]
 
 import array
@@ -82,10 +100,8 @@ def checksum(data):
 
 
 @register_oper(key="DUMP")
+@check_paras_len(eq=2)
 def do_dump(paras):
-    if len(paras) != 2:
-        return encode_para(["-ERR parameters error"])
-
     action, key = paras
     value = database.get(key)
     if value:
@@ -168,19 +184,15 @@ used_cpu_user_children:0.00
 
 
 @register_oper(key="INFO")
+@check_paras_len(lt=3)
 def do_info(paras):
-    if len(paras) > 2:
-        return encode_para(["-ERR parameters error"])
-
     #action, key = paras
     return encode_para([INFO.replace("\n", "\r\n")])
 
 
 @register_oper(key="CONFIG")
+@check_paras_len(gt=1)
 def do_config(paras):
-    if len(paras) < 2:
-        return encode_para(["-ERR parameters error"])
-
     action, oper = paras[:2]
     ret = []
     if oper.lower() == "get":
@@ -192,10 +204,8 @@ def do_config(paras):
 
 
 @register_oper(key="KEYS")
+@check_paras_len(eq=2)
 def do_keys(paras):
-    if len(paras) != 2:
-        return encode_para(["-ERR parameters error"])
-
     action, key = paras
     ret = database.keys(key)
     if ret:
@@ -205,10 +215,8 @@ def do_keys(paras):
 
 
 @register_oper(key="TYPE")
+@check_paras_len(eq=2)
 def do_type(paras):
-    if len(paras) != 2:
-        return encode_para(["-ERR parameters error"])
-
     action, key = paras
     ret = database.get_type(key)
     if ret:
@@ -218,10 +226,8 @@ def do_type(paras):
 
 
 @register_oper(key="TTL")
+@check_paras_len(eq=2)
 def do_ttl(paras):
-    if len(paras) != 2:
-        return encode_para(["-ERR parameters error"])
-
     action, key = paras
     ret = database.get_ttl(key)
     if ret:
@@ -231,37 +237,29 @@ def do_ttl(paras):
 
 
 @register_oper(key="OBJECT", subkey="REFCOUNT")
+@check_paras_len(eq=3)
 def do_object_refcount(paras):
-    if len(paras) != 3:
-        return encode_para(["-ERR parameters error"])
-
     action, subaction, key = paras
     return [":1\r\n"]
 
 
 @register_oper(key="OBJECT", subkey="IDLETIME")
+@check_paras_len(eq=3)
 def do_object_idletime(paras):
-    if len(paras) != 3:
-        return encode_para(["-ERR parameters error"])
-
     action, subaction, key = paras
     return [":100\r\n"]
 
 
 @register_oper(key="OBJECT", subkey="ENCODING")
+@check_paras_len(eq=3)
 def do_object_encoding(paras):
-    if len(paras) != 3:
-        return encode_para(["-ERR parameters error"])
-
     action, subaction, key = paras
     return encode_para(["raw"])
 
 
 @register_oper(key="EXISTS")
+@check_paras_len(eq=2)
 def do_exists(paras):
-    if len(paras) != 2:
-        return encode_para(["-ERR parameters error"])
-
     action, key = paras
     ret = database.get(key)
     if ret:
@@ -271,9 +269,8 @@ def do_exists(paras):
 
 
 @register_oper(key="SELECT")
+@check_paras_len(eq=2)
 def do_select(paras):
-    if len(paras) != 2:
-        return encode_para(["-ERR parameters error"])
     logging.debug("SELECT %s", str(paras))
     return ["$2\r\nOK\r\n"]
 
