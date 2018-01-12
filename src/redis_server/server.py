@@ -15,7 +15,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
                 paras = []
                 f = s.makefile()
                 count = f.readline()
-                resp = operation.encode_para(["-ERR unknown error"])
+                # resp = operation.encode_para(["-ERR unknown error"])
                 if count.startswith("*"):
                     count = int(count[1:].strip())
                     logging.debug(count)
@@ -30,10 +30,11 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
                             logging.debug("%s, %s", length, value)
                             paras.append(value)
                         else:
-                            resp = operation.encode_para(["-ERR parameters error"])
+                            # resp = operation.encode_para(["-ERR parameters error"])
+                            pass
                     ret = operation.handle_req(paras)
                     if len(ret) > 1:
-                        resp = "*%s\r\n%s"%(len(ret), "".join(ret))
+                        resp = "*%s\r\n%s" % (len(ret), "".join(ret))
                     else:
                         resp = "".join(ret)
 
@@ -51,10 +52,10 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
 
 
-class redis_server:
-    def __init__(self, HOST, PORT=6379):
-        self.HOST = HOST
-        self.PORT = PORT
+class RedisServer:
+    def __init__(self, host, port=6379):
+        self.HOST = host
+        self.PORT = port
         self.server = None
 
     def start(self, daemon=False):
@@ -62,7 +63,7 @@ class redis_server:
         server_thread = threading.Thread(target=self.server.serve_forever)
         server_thread.daemon = daemon
         server_thread.start()
-        print "pyredis-server listening on %s:%s"% (self.HOST, self.PORT)
+        print "pyredis-server listening on %s:%s" % (self.HOST, self.PORT)
 
     def stop(self):
         if self.server:

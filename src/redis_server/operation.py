@@ -1,8 +1,9 @@
-from store import database
 import logging
+import array
+from store import database
 
 
-oper_map = { }
+OPERATIONS = {}
 
 
 def register_oper(**kwds):
@@ -13,11 +14,11 @@ def register_oper(**kwds):
             key = key.upper()
             if subkey:
                 subkey = subkey.upper()
-                if key not in oper_map:
-                    oper_map[key] = {}
-                oper_map[key][subkey] = f
+                if key not in OPERATIONS:
+                    OPERATIONS[key] = {}
+                OPERATIONS[key][subkey] = f
             else:
-                oper_map[key] = f
+                OPERATIONS[key] = f
         return f
 
     return decorate
@@ -26,6 +27,7 @@ def register_oper(**kwds):
 def encode_para(paras):
     return map(lambda x: "$%s\r\n%s\r\n" % (len(x), x) if x else "$-1\r\n", paras)
 
+
 def no_oper(paras):
     logging.debug("operation not implemented: %s", str(paras))
     return encode_para(["-ERR opertion error."])
@@ -33,7 +35,7 @@ def no_oper(paras):
 
 def handle_req(paras):
     oper_name = paras[0].upper()
-    oper = oper_map.get(oper_name, no_oper)
+    oper = OPERATIONS.get(oper_name, no_oper)
     if type(oper) is dict:
         if len(paras) > 1:
             suboper_name = paras[1].upper()
@@ -43,10 +45,10 @@ def handle_req(paras):
     return oper(paras)
 
 
-def check_paras_len(*ffargs, **ffkeywords):
+def check_paras_len(**ffkeywords):
     def partial(func, *args, **keywords):
         def newfunc(*fargs, **fkeywords):
-            print (ffargs, ffkeywords)
+            # print (ffkeywords)
             eq = ffkeywords.get("eq")
             lt = ffkeywords.get("lt")
             gt = ffkeywords.get("gt")
@@ -57,8 +59,8 @@ def check_paras_len(*ffargs, **ffkeywords):
                 return encode_para(["-ERR parameters error"])
             if gt is not None and len(paras) <= gt:
                 return encode_para(["-ERR parameters error"])
-            print (func, args, keywords)
-            print (fargs, fkeywords)
+            # print (func, args, keywords)
+            # print (fargs, fkeywords)
             newkeywords = keywords.copy()
             newkeywords.update(fkeywords)
             return func(*(args + fargs), **newkeywords)
@@ -68,6 +70,7 @@ def check_paras_len(*ffargs, **ffkeywords):
         newfunc.keywords = keywords
         return newfunc
     return partial
+
 
 @register_oper(key="SET")
 @check_paras_len(eq=3)
@@ -89,14 +92,14 @@ def do_get(paras):
 def do_del(paras):
     return [":%s\r\n" % database.DEL(paras[1:])]
 
-import array
+
 def checksum(data):
     if len(data) % 2:
         data += b'\x00'
-    s = sum(array.array('H',data))
+    s = sum(array.array('H', data))
     s = (s & 0xffff) + (s >> 16)
     s += (s >> 16)
-    return (~s & 0xffff)
+    return ~s & 0xffff
 
 
 @register_oper(key="DUMP")
@@ -111,7 +114,7 @@ def do_dump(paras):
     return encode_para([ret])
 
 
-INFO="""# Server
+INFO = """# Server
 redis_version:2.5.9
 redis_git_sha1:473f3090
 redis_git_dirty:0
@@ -186,7 +189,8 @@ used_cpu_user_children:0.00
 @register_oper(key="INFO")
 @check_paras_len(lt=3)
 def do_info(paras):
-    #action, key = paras
+    action, key = paras
+    logging.debug(action, key)
     return encode_para([INFO.replace("\n", "\r\n")])
 
 
@@ -240,6 +244,7 @@ def do_ttl(paras):
 @check_paras_len(eq=3)
 def do_object_refcount(paras):
     action, subaction, key = paras
+    logging.debug(action, subaction, key)
     return [":1\r\n"]
 
 
@@ -247,6 +252,7 @@ def do_object_refcount(paras):
 @check_paras_len(eq=3)
 def do_object_idletime(paras):
     action, subaction, key = paras
+    logging.debug(action, subaction, key)
     return [":100\r\n"]
 
 
@@ -254,6 +260,7 @@ def do_object_idletime(paras):
 @check_paras_len(eq=3)
 def do_object_encoding(paras):
     action, subaction, key = paras
+    logging.debug(action, subaction, key)
     return encode_para(["raw"])
 
 
@@ -273,4 +280,3 @@ def do_exists(paras):
 def do_select(paras):
     logging.debug("SELECT %s", str(paras))
     return ["$2\r\nOK\r\n"]
-
