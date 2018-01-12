@@ -240,7 +240,7 @@ def do_object_refcount(paras):
 
 
 @register_oper(key="OBJECT", subkey="IDLETIME")
-def do_object_ideltime(paras):
+def do_object_idletime(paras):
     if len(paras) != 3:
         return encode_para(["-ERR parameters error"])
 
@@ -249,7 +249,7 @@ def do_object_ideltime(paras):
 
 
 @register_oper(key="OBJECT", subkey="ENCODING")
-def do_object_ideltime(paras):
+def do_object_encoding(paras):
     if len(paras) != 3:
         return encode_para(["-ERR parameters error"])
 
