@@ -88,7 +88,7 @@ def do_get(paras):
 
 
 @register_oper(key="DEL")
-@check_paras_len(eq=2)
+@check_paras_len(gt=1)
 def do_del(paras):
     return [":%s\r\n" % database.DEL(paras[1:])]
 
@@ -189,8 +189,8 @@ used_cpu_user_children:0.00
 @register_oper(key="INFO")
 @check_paras_len(lt=3)
 def do_info(paras):
-    action, key = paras
-    logging.debug(action, key)
+    #action, key = paras
+    logging.debug(paras)
     return encode_para([INFO.replace("\n", "\r\n")])
 
 
@@ -280,3 +280,16 @@ def do_exists(paras):
 def do_select(paras):
     logging.debug("SELECT %s", str(paras))
     return ["$2\r\nOK\r\n"]
+
+
+#############################################
+# implement operations for Key
+#############################################
+
+
+@register_oper(key="EXPIRE")
+@check_paras_len(eq=3)
+def key_expire(paras):
+    action, key, ttl = paras
+    database.expire(key, ttl)
+    return [":1\r\n"]
