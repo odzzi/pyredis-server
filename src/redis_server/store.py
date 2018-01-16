@@ -64,6 +64,18 @@ class database:
         database.LOCK.release()
         return "OK"
 
+    @staticmethod
+    def expireat(key, ttl_time):
+        ttl_time = float(ttl_time)
+        ret = 1
+        if database.LOCK.acquire():
+            if key in database.DATA and time.time() < ttl_time:
+                database.TTL[key] = ttl_time
+            else:
+                ret = 0
+        database.LOCK.release()
+        return ret
+
 
 def ttl_thread():
     while True:
