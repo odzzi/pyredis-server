@@ -59,10 +59,14 @@ class database:
 
     @staticmethod
     def expire(key, ttl):
+        ret = 1
         if database.LOCK.acquire():
-            database.TTL[key] = time.time() + int(ttl)
+            if key in database.DATA:
+                database.TTL[key] = time.time() + int(ttl)
+            else:
+                ret = 0
         database.LOCK.release()
-        return "OK"
+        return ret
 
     @staticmethod
     def expireat(key, ttl_time):
