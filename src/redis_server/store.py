@@ -31,7 +31,9 @@ class database:
 
     @staticmethod
     def keys(key):
-        ret = database.DATA.keys()
+        import re
+        patten = re.compile(key.replace("*", r"[\w]*").replace("?", "[\w]"))
+        ret = filter(lambda x: patten.match(x), database.DATA.keys())
         return ret
 
     @staticmethod
@@ -59,10 +61,26 @@ class database:
 
     @staticmethod
     def expire(key, ttl):
+        ret = 1
         if database.LOCK.acquire():
-            database.TTL[key] = time.time() + int(ttl)
+            if key in database.DATA:
+                database.TTL[key] = time.time() + int(ttl)
+            else:
+                ret = 0
         database.LOCK.release()
-        return "OK"
+        return ret
+
+    @staticmethod
+    def expireat(key, ttl_time):
+        ttl_time = float(ttl_time)
+        ret = 1
+        if database.LOCK.acquire():
+            if key in database.DATA and time.time() < ttl_time:
+                database.TTL[key] = ttl_time
+            else:
+                ret = 0
+        database.LOCK.release()
+        return ret
 
 
 def ttl_thread():

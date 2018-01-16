@@ -291,5 +291,13 @@ def do_select(paras):
 @check_paras_len(eq=3)
 def key_expire(paras):
     action, key, ttl = paras
-    database.expire(key, ttl)
-    return [":1\r\n"]
+    ret = database.expire(key, ttl)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="EXPIREAT")
+@check_paras_len(eq=3)
+def key_expire(paras):
+    action, key, ttl = paras
+    ret = database.expireat(key, ttl)
+    return [":%s\r\n" % ret]
