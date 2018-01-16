@@ -9,9 +9,10 @@ def test_redis_server(n=1, host="127.0.0.1", port=6379):
         for x in range(n):
             print r.set('foo_%s' % x, 'bar')
             print r.get('foo_%s' % x)
-            print r.expireat('foo_%s' % x, time.time() + 123)
+            print r.expire('foo_%s' % x, 123)
             print r.dump('foo_%s' % x)
             print r.keys('foo_%s' % x)
+        print r.keys("foo_1*")
     except Exception,e:
         #print e
         pass
@@ -30,7 +31,7 @@ if __name__ == "__main__":
         PORT = sys.argv[2]
     threads = []
     for x in range(1):
-        t = threading.Thread(target=test_redis_server, args=(10, HOST, PORT))
+        t = threading.Thread(target=test_redis_server, args=(13, HOST, PORT))
         threads.append(t)
 
     for thread in threads:

@@ -31,7 +31,9 @@ class database:
 
     @staticmethod
     def keys(key):
-        ret = database.DATA.keys()
+        import re
+        patten = re.compile(key.replace("*", r"[\w]*").replace("?", "[\w]"))
+        ret = filter(lambda x: patten.match(x), database.DATA.keys())
         return ret
 
     @staticmethod
