@@ -10,11 +10,15 @@ def test_redis_server(n=1, host="127.0.0.1", port=6379):
             print r.set('foo_%s' % x, 'bar')
             print r.get('foo_%s' % x)
             print r.expire('foo_%s' % x, 123)
+            print r.pexpireat('foo_%s' % x, int(time.time()*1000 + 123))
+            print r.pttl('foo_%s' % x)
             print r.dump('foo_%s' % x)
-            print r.keys('foo_%s' % x)
+            print r.persist('foo_%s' % x)
+        print r.keys("foo_1*")
+        r = redis.StrictRedis(host=host, port=port, db=2)
         print r.keys("foo_1*")
     except Exception,e:
-        #print e
+        print e
         pass
     print time.time() - stime
 

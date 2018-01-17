@@ -240,6 +240,17 @@ def do_ttl(paras):
         return ["$-2\r\n"]
 
 
+@register_oper(key="PTTL")
+@check_paras_len(eq=2)
+def do_pttl(paras):
+    action, key = paras
+    ret = database.get_pttl(key)
+    if ret:
+        return [":%s\r\n" % ret]
+    else:
+        return ["$-2\r\n"]
+
+
 @register_oper(key="OBJECT", subkey="REFCOUNT")
 @check_paras_len(eq=3)
 def do_object_refcount(paras):
@@ -279,6 +290,8 @@ def do_exists(paras):
 @check_paras_len(eq=2)
 def do_select(paras):
     logging.debug("SELECT %s", str(paras))
+    action, db_index = paras
+    database.select(db_index)
     return ["$2\r\nOK\r\n"]
 
 
@@ -295,9 +308,42 @@ def key_expire(paras):
     return [":%s\r\n" % ret]
 
 
+@register_oper(key="PEXPIRE")
+@check_paras_len(eq=3)
+def key_pexpire(paras):
+    action, key, ttl = paras
+    ret = database.pexpire(key, ttl)
+    return [":%s\r\n" % ret]
+
+
 @register_oper(key="EXPIREAT")
 @check_paras_len(eq=3)
-def key_expire(paras):
+def key_expireat(paras):
     action, key, ttl = paras
     ret = database.expireat(key, ttl)
     return [":%s\r\n" % ret]
+
+
+@register_oper(key="PEXPIREAT")
+@check_paras_len(eq=3)
+def key_pexpireat(paras):
+    action, key, ttl = paras
+    ret = database.pexpireat(key, ttl)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="MOVE")
+@check_paras_len(eq=3)
+def key_move(paras):
+    action, key, db_index = paras
+    ret = database.move(key, db_index)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="PERSIST")
+@check_paras_len(eq=2)
+def key_move(paras):
+    action, key = paras
+    ret = database.persist(key)
+    return [":%s\r\n" % ret]
+
