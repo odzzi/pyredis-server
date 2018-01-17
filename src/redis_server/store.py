@@ -4,9 +4,16 @@ import time
 
 class database:
     DATA = {}
+    DATABASES = [{} for x in range(16)]
     TTL = {}
     LOCK = threading.Lock()
     CONFIG = {"databases": "16"}
+
+    @staticmethod
+    def select(db_index):
+        if database.LOCK.acquire():
+            database.DATA = database.DATABASES[int(db_index)]
+            database.LOCK.release()
 
     @staticmethod
     def set(key, value):
@@ -82,6 +89,17 @@ class database:
         database.LOCK.release()
         return ret
 
+    @staticmethod
+    def move(key, db_index):
+        ret = 1
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                database.DATABASES[int(db_index)][key] = database.DATA.pop(key)
+            else:
+                ret = 0
+        database.LOCK.release()
+        return ret
+
 
 def ttl_thread():
     while True:
@@ -96,5 +114,7 @@ def ttl_thread():
         database.DEL(keys_to_del)
 
 
+# initial code
 TTL_THREAD = threading.Thread(target=ttl_thread)
 TTL_THREAD.start()
+database.DATA = database.DATABASES[0]

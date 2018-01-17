@@ -279,6 +279,8 @@ def do_exists(paras):
 @check_paras_len(eq=2)
 def do_select(paras):
     logging.debug("SELECT %s", str(paras))
+    action, db_index = paras
+    database.select(db_index)
     return ["$2\r\nOK\r\n"]
 
 
@@ -297,7 +299,16 @@ def key_expire(paras):
 
 @register_oper(key="EXPIREAT")
 @check_paras_len(eq=3)
-def key_expire(paras):
+def key_expireat(paras):
     action, key, ttl = paras
     ret = database.expireat(key, ttl)
     return [":%s\r\n" % ret]
+
+
+@register_oper(key="MOVE")
+@check_paras_len(eq=3)
+def key_move(paras):
+    action, key, db_index = paras
+    ret = database.move(key, db_index)
+    return [":%s\r\n" % ret]
+
