@@ -144,6 +144,66 @@ class database:
         database.LOCK.release()
         return ret
 
+    @staticmethod
+    def randomkey():
+        import random
+        keys = database.DATA.keys()
+        if keys:
+            ret = keys[random.randint(0, len(keys))]
+            return ret
+        else:
+            return None
+
+    @staticmethod
+    def rename(key, newkey):
+        ret = "OK"
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                database.DATA[newkey] = database.DATA.pop(key)
+                if key in database.TTL:
+                    database.TTL[newkey] = database.TTL.pop(key)
+            else:
+                ret = "-ERR no such key"
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def renamenx(key, newkey):
+        ret = 0
+        if database.LOCK.acquire():
+            if key in database.DATA and newkey not in database.DATA:
+                database.DATA[newkey] = database.DATA.pop(key)
+                if key in database.TTL:
+                    database.TTL[newkey] = database.TTL.pop(key)
+            else:
+                ret = 1
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def dump(key):
+        ret = database.get(key)
+        if ret:
+            import pickle
+            return pickle.dumps(ret)
+        return ret
+
+    @staticmethod
+    def restore(key, ttl, serialized_value):
+        ret = "OK"
+        import pickle
+        if database.LOCK.acquire():
+            try:
+                value = pickle.loads(serialized_value)
+                database.DATA[key] = value
+                ttl = int(ttl)
+                if ttl:
+                    database.expire(key, ttl)
+            except:
+                ret = "-ERR DUMP payload version or checksum are wrong"
+        database.LOCK.release()
+        return ret
+
 
 def ttl_thread():
     while True:
