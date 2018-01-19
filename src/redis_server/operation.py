@@ -105,12 +105,9 @@ def checksum(data):
 @register_oper(key="DUMP")
 @check_paras_len(eq=2)
 def do_dump(paras):
+    import pickle
     action, key = paras
-    value = database.get(key)
-    if value:
-        ret = hex(checksum(value))
-    else:
-        ret = ["$-1\r\n"]
+    ret = database.dump(key)
     return encode_para([ret])
 
 
@@ -189,7 +186,7 @@ used_cpu_user_children:0.00
 @register_oper(key="INFO")
 @check_paras_len(lt=3)
 def do_info(paras):
-    #action, key = paras
+    # action, key = paras
     logging.debug(paras)
     return encode_para([INFO.replace("\n", "\r\n")])
 
@@ -342,8 +339,40 @@ def key_move(paras):
 
 @register_oper(key="PERSIST")
 @check_paras_len(eq=2)
-def key_move(paras):
+def key_persist(paras):
     action, key = paras
     ret = database.persist(key)
     return [":%s\r\n" % ret]
+
+
+@register_oper(key="RANDOMKEY")
+@check_paras_len(eq=1)
+def key_randomkey(paras):
+    action = paras
+    ret = database.randomkey()
+    return encode_para([ret])
+
+
+@register_oper(key="RENAME")
+@check_paras_len(eq=3)
+def key_rename(paras):
+    action, key, newkey = paras
+    ret = database.rename(key, newkey)
+    return encode_para([ret])
+
+
+@register_oper(key="RENAMENX")
+@check_paras_len(eq=3)
+def key_renamenx(paras):
+    action, key, newkey = paras
+    ret = database.renamenx(key, newkey)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="RESTORE")
+@check_paras_len(eq=4)
+def key_restore(paras):
+    action, key, ttl, serialized_value = paras
+    ret = database.restore(key, ttl, serialized_value)
+    return encode_para([ret])
 
