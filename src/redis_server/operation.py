@@ -376,3 +376,44 @@ def key_restore(paras):
     ret = database.restore(key, ttl, serialized_value)
     return encode_para([ret])
 
+
+#############################################
+# implement operations for String
+#############################################
+
+@register_oper(key="APPEND")
+@check_paras_len(eq=3)
+def str_append(paras):
+    action, key, value = paras
+    ret = database.append(key, value)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="SETBIT")
+@check_paras_len(eq=4)
+def str_setbit(paras):
+    action, key, offset, value = paras
+    ret = database.setbit(key, offset, value)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="GETBIT")
+@check_paras_len(eq=3)
+def str_getbit(paras):
+    action, key, offset = paras
+    ret = database.getbit(key, offset)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITCOUNT")
+@check_paras_len(gt=2)
+def str_bitcount(paras):
+    start, end = None, None
+    if len(paras) == 2:
+        action, key = paras
+    elif len(paras) == 3:
+        action, key, start = paras
+    elif len(paras) == 4:
+        action, key, start, end = paras
+    ret = database.bitcount(key, start, end)
+    return [":%s\r\n" % ret]

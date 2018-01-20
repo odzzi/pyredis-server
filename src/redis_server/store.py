@@ -204,6 +204,66 @@ class database:
         database.LOCK.release()
         return ret
 
+    @staticmethod
+    def append(key, value):
+        ret = 0
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                database.DATA[key] = database.DATA[key] + value
+            else:
+                database.DATA[key] = value
+            ret = len(database.DATA[key])
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def setbit(key, offset, value):
+        ret = 0
+        offset = int(offset)
+        value = int(value)
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                old = database.DATA[key]
+                ret = (old >> offset) & 0x01
+                if value == 1:
+                    database.DATA[key] = old | (value << offset)
+                else:
+                    database.DATA[key] = old & (value << offset)
+            else:
+                database.DATA[key] = value << offset
+                ret = value
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def getbit(key, offset):
+        ret = 0
+        offset = int(offset)
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                old = database.DATA[key]
+                ret = (old >> offset) & 0x01
+            else:
+                database.DATA[key] = 0
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def bitcount(key, start, end):
+        ret = 0
+        if start:
+            start = int(start)
+        if end:
+            end = int(end)
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                value = database.DATA[key]
+                ret = bin(value)[2:][::-1][start:end].count("1")
+            else:
+                database.DATA[key] = 0
+        database.LOCK.release()
+        return ret
+
 
 def ttl_thread():
     while True:
