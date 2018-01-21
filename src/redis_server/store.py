@@ -290,6 +290,62 @@ class database:
         database.LOCK.release()
         return ret
 
+    @staticmethod
+    def decr(key, amount):
+        ret = 0
+        if database.LOCK.acquire():
+            try:
+                value = int(database.DATA.get(key, 0))
+                database.DATA[key] = "%s" % (value - int(amount))
+                ret = database.DATA[key]
+            except :
+                ret = "-ERR value is not an integer or out of range"
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def incr(key, amount):
+        ret = 0
+        if database.LOCK.acquire():
+            try:
+                value = int(database.DATA.get(key, 0))
+                database.DATA[key] = "%s" % (value + int(amount))
+                ret = database.DATA[key]
+            except :
+                ret = "-ERR value is not an integer or out of range"
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def incr_float(key, amount):
+        ret = 0
+        if database.LOCK.acquire():
+            try:
+                value = float(database.DATA.get(key, 0))
+                database.DATA[key] = "%s" % (value + float(amount))
+                ret = database.DATA[key]
+            except Exception, e:
+                print e
+                ret = "-ERR value is not an integer or out of range"
+        database.LOCK.release()
+        return str(ret)
+
+    @staticmethod
+    def getrange(key, start, end):
+        start, end = int(start), int(end)
+        value = database.DATA.get(key)
+        if value:
+            return value[start:end]
+        return None
+
+    @staticmethod
+    def getset(key, value):
+        ret = database.DATA.get(key, None)
+        if database.LOCK.acquire():
+            database.DATA[key] = value
+        database.LOCK.release()
+        return ret
+
 
 def ttl_thread():
     while True:

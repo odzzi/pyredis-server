@@ -423,33 +423,86 @@ def str_bitcount(paras):
 @check_paras_len(gt=3)
 def str_bitop_and(paras):
     action, subaction, destkey = paras[:3]
-    # logging.debug(action, subaction, destkey, paras[3:])
     ret = database.bitop(subaction, destkey, paras[3:])
     return [":%s\r\n" % ret]
 
 
 @register_oper(key="BITOP", subkey="OR")
 @check_paras_len(gt=3)
-def str_bitop_and(paras):
+def str_bitop_or(paras):
     action, subaction, destkey = paras[:3]
-    # logging.debug(action, subaction, destkey, paras[3:])
     ret = database.bitop(subaction, destkey, paras[3:])
     return [":%s\r\n" % ret]
 
 
 @register_oper(key="BITOP", subkey="XOR")
 @check_paras_len(gt=3)
-def str_bitop_and(paras):
+def str_bitop_xor(paras):
     action, subaction, destkey = paras[:3]
-    # logging.debug(action, subaction, destkey, paras[3:])
     ret = database.bitop(subaction, destkey, paras[3:])
     return [":%s\r\n" % ret]
 
 
 @register_oper(key="BITOP", subkey="NOT")
 @check_paras_len(eq=3)
-def str_bitop_and(paras):
+def str_bitop_not(paras):
     action, subaction, destkey = paras[:3]
-    # logging.debug(action, subaction, destkey, paras[3:])
     ret = database.bitop(subaction, destkey, paras[3:])
     return [":%s\r\n" % ret]
+
+
+@register_oper(key="DECR")
+@check_paras_len(eq=2)
+def str_decr(paras):
+    action, key = paras
+    ret = database.decr(key, 1)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="DECRBY")
+@check_paras_len(eq=3)
+def str_decrby(paras):
+    action, key, decrement = paras
+    ret = database.decr(key, decrement)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="INCR")
+@check_paras_len(eq=2)
+def str_incr(paras):
+    action, key = paras
+    ret = database.incr(key, 1)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="INCRBY")
+@check_paras_len(eq=3)
+def str_incrby(paras):
+    action, key, increment = paras
+    ret = database.incr(key, increment)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="INCRBYFLOAT")
+@check_paras_len(eq=3)
+def str_incrbyfloat(paras):
+    action, key, increment = paras
+    ret = database.incr_float(key, increment)
+    return encode_para([ret])
+
+
+@register_oper(key="GETRANGE")
+@check_paras_len(eq=4)
+def str_getrange(paras):
+    action, key, start, end = paras
+    ret = database.getrange(key, start, end)
+    return encode_para([ret])
+
+
+@register_oper(key="GETSET")
+@check_paras_len(eq=3)
+def str_getset(paras):
+    action, key, value = paras
+    ret = database.getset(key, value)
+    return encode_para([ret])
+
