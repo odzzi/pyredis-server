@@ -264,6 +264,32 @@ class database:
         database.LOCK.release()
         return ret
 
+    @staticmethod
+    def bitop(subaction, destkey, keys):
+        ret = 0
+        subaction = subaction.lower()
+        if database.LOCK.acquire():
+            values = map(lambda x: database.DATA[x], keys)
+            values0 = None
+            if values:
+                value0 = values[0]
+            if subaction == "and":
+                for value in values[1:]:
+                    value0 &= value
+            elif subaction == "or":
+                for value in values[1:]:
+                    value0 |= value
+            elif subaction == "xor":
+                for value in values[1:]:
+                    value0 ^= value
+            elif subaction == "not":
+                    value0 = ~(database.DATA[destkey])
+            database.DATA[destkey] = value0
+            strValue = hex(value0)[2:]
+            ret = len(strValue)/2
+        database.LOCK.release()
+        return ret
+
 
 def ttl_thread():
     while True:

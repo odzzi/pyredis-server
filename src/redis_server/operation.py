@@ -417,3 +417,39 @@ def str_bitcount(paras):
         action, key, start, end = paras
     ret = database.bitcount(key, start, end)
     return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITOP", subkey="AND")
+@check_paras_len(gt=3)
+def str_bitop_and(paras):
+    action, subaction, destkey = paras[:3]
+    # logging.debug(action, subaction, destkey, paras[3:])
+    ret = database.bitop(subaction, destkey, paras[3:])
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITOP", subkey="OR")
+@check_paras_len(gt=3)
+def str_bitop_and(paras):
+    action, subaction, destkey = paras[:3]
+    # logging.debug(action, subaction, destkey, paras[3:])
+    ret = database.bitop(subaction, destkey, paras[3:])
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITOP", subkey="XOR")
+@check_paras_len(gt=3)
+def str_bitop_and(paras):
+    action, subaction, destkey = paras[:3]
+    # logging.debug(action, subaction, destkey, paras[3:])
+    ret = database.bitop(subaction, destkey, paras[3:])
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITOP", subkey="NOT")
+@check_paras_len(eq=3)
+def str_bitop_and(paras):
+    action, subaction, destkey = paras[:3]
+    # logging.debug(action, subaction, destkey, paras[3:])
+    ret = database.bitop(subaction, destkey, paras[3:])
+    return [":%s\r\n" % ret]
