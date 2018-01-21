@@ -376,3 +376,133 @@ def key_restore(paras):
     ret = database.restore(key, ttl, serialized_value)
     return encode_para([ret])
 
+
+#############################################
+# implement operations for String
+#############################################
+
+@register_oper(key="APPEND")
+@check_paras_len(eq=3)
+def str_append(paras):
+    action, key, value = paras
+    ret = database.append(key, value)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="SETBIT")
+@check_paras_len(eq=4)
+def str_setbit(paras):
+    action, key, offset, value = paras
+    ret = database.setbit(key, offset, value)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="GETBIT")
+@check_paras_len(eq=3)
+def str_getbit(paras):
+    action, key, offset = paras
+    ret = database.getbit(key, offset)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITCOUNT")
+@check_paras_len(gt=2)
+def str_bitcount(paras):
+    start, end = None, None
+    if len(paras) == 2:
+        action, key = paras
+    elif len(paras) == 3:
+        action, key, start = paras
+    elif len(paras) == 4:
+        action, key, start, end = paras
+    ret = database.bitcount(key, start, end)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITOP", subkey="AND")
+@check_paras_len(gt=3)
+def str_bitop_and(paras):
+    action, subaction, destkey = paras[:3]
+    ret = database.bitop(subaction, destkey, paras[3:])
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITOP", subkey="OR")
+@check_paras_len(gt=3)
+def str_bitop_or(paras):
+    action, subaction, destkey = paras[:3]
+    ret = database.bitop(subaction, destkey, paras[3:])
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITOP", subkey="XOR")
+@check_paras_len(gt=3)
+def str_bitop_xor(paras):
+    action, subaction, destkey = paras[:3]
+    ret = database.bitop(subaction, destkey, paras[3:])
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="BITOP", subkey="NOT")
+@check_paras_len(eq=3)
+def str_bitop_not(paras):
+    action, subaction, destkey = paras[:3]
+    ret = database.bitop(subaction, destkey, paras[3:])
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="DECR")
+@check_paras_len(eq=2)
+def str_decr(paras):
+    action, key = paras
+    ret = database.decr(key, 1)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="DECRBY")
+@check_paras_len(eq=3)
+def str_decrby(paras):
+    action, key, decrement = paras
+    ret = database.decr(key, decrement)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="INCR")
+@check_paras_len(eq=2)
+def str_incr(paras):
+    action, key = paras
+    ret = database.incr(key, 1)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="INCRBY")
+@check_paras_len(eq=3)
+def str_incrby(paras):
+    action, key, increment = paras
+    ret = database.incr(key, increment)
+    return [":%s\r\n" % ret]
+
+
+@register_oper(key="INCRBYFLOAT")
+@check_paras_len(eq=3)
+def str_incrbyfloat(paras):
+    action, key, increment = paras
+    ret = database.incr_float(key, increment)
+    return encode_para([ret])
+
+
+@register_oper(key="GETRANGE")
+@check_paras_len(eq=4)
+def str_getrange(paras):
+    action, key, start, end = paras
+    ret = database.getrange(key, start, end)
+    return encode_para([ret])
+
+
+@register_oper(key="GETSET")
+@check_paras_len(eq=3)
+def str_getset(paras):
+    action, key, value = paras
+    ret = database.getset(key, value)
+    return encode_para([ret])
+

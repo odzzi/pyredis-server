@@ -47,18 +47,17 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             logging.warn("%s: %s", s.getpeername(), str(e))
 
 
-class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
-    request_queue_size = 100
-    pass
-
-
 class RedisServer:
     def __init__(self, host, port=6379):
         self.HOST = host
         self.PORT = port
         self.server = None
 
-    def start(self, daemon=False):
+    def start(self, daemon=False, req_queue_size=100):
+        class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+            request_queue_size = req_queue_size
+            pass
+
         self.server = ThreadedTCPServer((self.HOST, self.PORT), ThreadedTCPRequestHandler)
         server_thread = threading.Thread(target=self.server.serve_forever)
         server_thread.daemon = daemon

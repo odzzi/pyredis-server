@@ -204,6 +204,148 @@ class database:
         database.LOCK.release()
         return ret
 
+    @staticmethod
+    def append(key, value):
+        ret = 0
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                database.DATA[key] = database.DATA[key] + value
+            else:
+                database.DATA[key] = value
+            ret = len(database.DATA[key])
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def setbit(key, offset, value):
+        ret = 0
+        offset = int(offset)
+        value = int(value)
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                old = database.DATA[key]
+                ret = (old >> offset) & 0x01
+                if value == 1:
+                    database.DATA[key] = old | (value << offset)
+                else:
+                    database.DATA[key] = old & (value << offset)
+            else:
+                database.DATA[key] = value << offset
+                ret = value
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def getbit(key, offset):
+        ret = 0
+        offset = int(offset)
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                old = database.DATA[key]
+                ret = (old >> offset) & 0x01
+            else:
+                database.DATA[key] = 0
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def bitcount(key, start, end):
+        ret = 0
+        if start:
+            start = int(start)
+        if end:
+            end = int(end)
+        if database.LOCK.acquire():
+            if key in database.DATA:
+                value = database.DATA[key]
+                ret = bin(value)[2:][::-1][start:end].count("1")
+            else:
+                database.DATA[key] = 0
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def bitop(subaction, destkey, keys):
+        ret = 0
+        subaction = subaction.lower()
+        if database.LOCK.acquire():
+            values = map(lambda x: database.DATA[x], keys)
+            values0 = None
+            if values:
+                value0 = values[0]
+            if subaction == "and":
+                for value in values[1:]:
+                    value0 &= value
+            elif subaction == "or":
+                for value in values[1:]:
+                    value0 |= value
+            elif subaction == "xor":
+                for value in values[1:]:
+                    value0 ^= value
+            elif subaction == "not":
+                    value0 = ~(database.DATA[destkey])
+            database.DATA[destkey] = value0
+            strValue = hex(value0)[2:]
+            ret = len(strValue)/2
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def decr(key, amount):
+        ret = 0
+        if database.LOCK.acquire():
+            try:
+                value = int(database.DATA.get(key, 0))
+                database.DATA[key] = "%s" % (value - int(amount))
+                ret = database.DATA[key]
+            except :
+                ret = "-ERR value is not an integer or out of range"
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def incr(key, amount):
+        ret = 0
+        if database.LOCK.acquire():
+            try:
+                value = int(database.DATA.get(key, 0))
+                database.DATA[key] = "%s" % (value + int(amount))
+                ret = database.DATA[key]
+            except :
+                ret = "-ERR value is not an integer or out of range"
+        database.LOCK.release()
+        return ret
+
+    @staticmethod
+    def incr_float(key, amount):
+        ret = 0
+        if database.LOCK.acquire():
+            try:
+                value = float(database.DATA.get(key, 0))
+                database.DATA[key] = "%s" % (value + float(amount))
+                ret = database.DATA[key]
+            except Exception, e:
+                print e
+                ret = "-ERR value is not an integer or out of range"
+        database.LOCK.release()
+        return str(ret)
+
+    @staticmethod
+    def getrange(key, start, end):
+        start, end = int(start), int(end)
+        value = database.DATA.get(key)
+        if value:
+            return value[start:end]
+        return None
+
+    @staticmethod
+    def getset(key, value):
+        ret = database.DATA.get(key, None)
+        if database.LOCK.acquire():
+            database.DATA[key] = value
+        database.LOCK.release()
+        return ret
+
 
 def ttl_thread():
     while True:
