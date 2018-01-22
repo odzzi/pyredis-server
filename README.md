@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.org/billy0920/pyredis-server.svg?branch=master)](https://www.travis-ci.org/billy0920/pyredis-server)
+
 # pyredis-server
 > Python implement redis server.
 
