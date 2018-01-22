@@ -1,3 +1,4 @@
+[![Author](https://img.shields.io/badge/author-billy0920-orange.svg)](https://billy0920.github.io/python_tips/chapters/preface)
 [![Build Status](https://www.travis-ci.org/billy0920/pyredis-server.svg?branch=master)](https://www.travis-ci.org/billy0920/pyredis-server)
 
 # pyredis-server
