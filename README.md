@@ -1,3 +1,5 @@
+.. image:: https://www.travis-ci.org/billy0920/pyredis-server.svg?branch=master
+    :target: https://www.travis-ci.org/billy0920/pyredis-server
 # pyredis-server
 > Python implement redis server.
 
