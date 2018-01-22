@@ -30,3 +30,4 @@ if __name__ == "__main__":
 
     s = server.RedisServer(host=HOST, port=PORT)
     s.start()
+    xx
