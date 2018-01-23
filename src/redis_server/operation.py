@@ -73,11 +73,12 @@ def check_paras_len(**ffkeywords):
 
 
 @register_oper(key="SET")
-@check_paras_len(eq=3)
+@check_paras_len(gt=2)
 def do_set(paras):
-    action, key, value = paras
-    database.set(key=key, value=value)
-    return encode_para(["OK"])
+    # SET key value [EX seconds] [PX milliseconds] [NX|XX]
+    action, key, value = paras[:3]
+    ret = database.set(key=key, value=value, ext=paras[3:])
+    return encode_para([ret])
 
 
 @register_oper(key="GET")
@@ -505,4 +506,35 @@ def str_getset(paras):
     action, key, value = paras
     ret = database.getset(key, value)
     return encode_para([ret])
+
+
+@register_oper(key="MGET")
+@check_paras_len(gt=1)
+def str_mget(paras):
+    ret = database.mget(paras[1:])
+    return encode_para(ret)
+
+
+@register_oper(key="MSET")
+@check_paras_len(gt=2)
+def str_mset(paras):
+    keys = paras[1::2]
+    values = paras[2::2]
+    if len(keys) == len(values):
+        ret = database.mset(keys, values)
+    else:
+        ret = ["-ERR keys do not match values"]
+    return encode_para(ret)
+
+
+@register_oper(key="MSETNX")
+@check_paras_len(gt=2)
+def str_msetnx(paras):
+    keys = paras[1::2]
+    values = paras[2::2]
+    if len(keys) == len(values):
+        ret = [":%s\r\n" % database.msetnx(keys, values)]
+    else:
+        ret = encode_para(["-ERR keys do not match values"])
+    return ret
 
