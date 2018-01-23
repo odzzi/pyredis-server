@@ -1,8 +1,11 @@
-
+from redis_server import server
 
 def test_redis_server(n=1, host="127.0.0.1", port=6379):
     import redis
     import time
+
+    s = server.RedisServer(host=HOST, port=PORT)
+    s.start()
     r = redis.StrictRedis(host=host, port=port, db=1)
     stime = time.time()
     try:
@@ -32,6 +35,7 @@ def test_redis_server(n=1, host="127.0.0.1", port=6379):
         print e
         pass
     print time.time() - stime
+    s.stop()
 
 
 if __name__ == "__main__":
