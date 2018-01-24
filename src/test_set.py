@@ -1,11 +1,11 @@
-# from redis_server import server
+from redis_server import server
 
 def test_redis_server(n=1, host="127.0.0.1", port=6379):
     import redis
     import time
 
-    #s = server.RedisServer(host=host, port=port)
-    #s.start()
+    s = server.RedisServer(host=host, port=port)
+    s.start()
     r = redis.StrictRedis(host=host, port=port, db=1)
     stime = time.time()
     try:
@@ -35,29 +35,4 @@ def test_redis_server(n=1, host="127.0.0.1", port=6379):
         print e
         pass
     print time.time() - stime
-    #s.stop()
-
-
-if __name__ == "__main__":
-    import sys
-    HOST = "127.0.0.1"
-    PORT = 6379
-    if len(sys.argv) == 2:
-        PORT = int(sys.argv[1])
-    elif len(sys.argv) == 3:
-        HOST = sys.argv[1]
-        PORT = sys.argv[2]
-
-    test_redis_server(13, HOST, PORT)
-    print "finish"
-    # threads = []
-    # for x in range(1):
-    #     t = threading.Thread(target=test_redis_server, args=(13, HOST, PORT))
-    #     threads.append(t)
-    #
-    # for thread in threads:
-    #     thread.start()
-    #
-    # for thread in threads:
-    #     thread.join()
-    #
+    s.stop()
