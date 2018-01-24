@@ -397,8 +397,9 @@ class database:
         return 1
 
 
+TTL_THREAD_RUNNING = True
 def ttl_thread():
-    while True:
+    while TTL_THREAD_RUNNING:
         time.sleep(1)
         now = time.time()
         keys = database.TTL.keys()
@@ -412,5 +413,5 @@ def ttl_thread():
 
 # initial code
 TTL_THREAD = threading.Thread(target=ttl_thread)
-TTL_THREAD.start()
+# TTL_THREAD.start()
 database.DATA = database.DATABASES[0]

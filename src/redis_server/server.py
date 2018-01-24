@@ -1,6 +1,7 @@
 import threading
 import SocketServer
 import operation
+import store
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -58,6 +59,8 @@ class RedisServer:
             request_queue_size = req_queue_size
             pass
 
+        store.TTL_THREAD_RUNNING = True
+        store.TTL_THREAD.start()
         self.server = ThreadedTCPServer((self.HOST, self.PORT), ThreadedTCPRequestHandler)
         server_thread = threading.Thread(target=self.server.serve_forever)
         server_thread.daemon = daemon
@@ -69,3 +72,4 @@ class RedisServer:
             self.server.shutdown()
             self.server.server_close()
             self.server = None
+            store.TTL_THREAD_RUNNING = False
