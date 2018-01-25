@@ -36,7 +36,7 @@ def test_key_expire_ttl():
     assert(ret == [":1\r\n"])
 
     ret = operation.handle_req(["TTL", "KEY_TTL"])
-    assert(ret == [":1000\r\n"])
+    assert(ret == [":999\r\n"])
 
     import time
     ret = operation.handle_req(["EXPIREAT", "KEY_TTL", "%s" % (time.time() + 999)])
@@ -58,7 +58,7 @@ def test_key_pexpire_pttl():
     assert(ret == [":1\r\n"])
 
     ret = operation.handle_req(["PTTL", "KEY_PTTL"])
-    assert(ret == [":1000\r\n"])
+    assert(ret == [":999\r\n"])
 
 
 def test_key_pexpireat_pttl():
