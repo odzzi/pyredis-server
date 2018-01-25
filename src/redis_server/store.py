@@ -16,10 +16,33 @@ class database:
             database.LOCK.release()
 
     @staticmethod
-    def set(key, value):
+    def set(key, value, ext):
+        seconds = None
+        milliseconds = None
+        mode = None
+        if ext:
+            if "EX" in ext:
+                seconds = ext[ext.index("EX") + 1]
+            if "PX" in ext:
+                milliseconds = ext[ext.index("PX") + 1]
+            if "NX" in ext:
+                mode = "NX"
+            if "XX" in ext:
+                mode = "XX"
+        if mode == "NX" and (database.get(key) is not None):
+            return None
+        if mode == "XX" and (database.get(key) is None):
+            return None
+
         if database.LOCK.acquire():
             database.DATA[key] = value
             database.LOCK.release()
+        if seconds:
+            database.expire(key, seconds)
+        if milliseconds:
+            database.pexpire(key, milliseconds)
+
+        return "OK"
 
     @staticmethod
     def get(key):
@@ -346,9 +369,37 @@ class database:
         database.LOCK.release()
         return ret
 
+    @staticmethod
+    def mget(keys):
+        ret = map(lambda key: database.DATA.get(key, None), keys)
+        return ret
 
+    @staticmethod
+    def mset(keys, values):
+        data = { }
+        for key, value in zip(keys, values):
+            data[key] = value
+        if database.LOCK.acquire():
+            database.DATA.update(data)
+        database.LOCK.release()
+        return ["OK"]
+
+    @staticmethod
+    def msetnx(keys, values):
+        data = { }
+        for key, value in zip(keys, values):
+            if database.DATA.get(key) is not None:
+                return 0
+            data[key] = value
+        if database.LOCK.acquire():
+            database.DATA.update(data)
+        database.LOCK.release()
+        return 1
+
+
+TTL_THREAD_RUNNING = True
 def ttl_thread():
-    while True:
+    while TTL_THREAD_RUNNING:
         time.sleep(1)
         now = time.time()
         keys = database.TTL.keys()
@@ -362,5 +413,5 @@ def ttl_thread():
 
 # initial code
 TTL_THREAD = threading.Thread(target=ttl_thread)
-TTL_THREAD.start()
+# TTL_THREAD.start()
 database.DATA = database.DATABASES[0]
